@@ -18,35 +18,46 @@ from detection.deep_sort.tracker import Tracker
 from detection.tools import generate_detections as gdet
 from PIL import Image
 
-flags.DEFINE_string('classes', './data/labels/coco.names', 'path to classes file')
-flags.DEFINE_string('weights', './weights/yolov3.tf',
-                    'path to weights file')
-flags.DEFINE_boolean('tiny', False, 'yolov3 or yolov3-tiny')
-flags.DEFINE_integer('size', 416, 'resize images to')
-flags.DEFINE_string('video', './data/video/test.mp4',
-                    'path to video file or number for webcam)')
-flags.DEFINE_string('output', None, 'path to output video')
-flags.DEFINE_string('output_format', 'XVID', 'codec used in VideoWriter when saving video to file')
-flags.DEFINE_integer('num_classes', 80, 'number of classes in the model')
+def detect(config):
+    video = './data/video/test.mp4'
+    if config['video']:
+        video = config['video']
+    
+    num_classes = 80
+    if config['num_classes']:
+        num_classes = config['num_classes']
 
+    tiny = False
+    if config['tiny']:
+        tiny = config['tiny']
 
-def detect(args):
-    print("hey yo")
+    weights = './weights/yolov3.tf'
+    if config['weights']:
+        weights = config['weights']
 
-    num_classes = args.num_classes if args.num_classes is not None else FLAGS.num_classes
-    tiny = args.tiny if args.tiny is not None else FLAGS.tiny
-    weights = args.weights if args.weights is not None else FLAGS.weights
-    video = args.video if args.video is not None else FLAGS.video
-    classes = args.classes if args.classes is not None else FLAGS.classes
-    output_format = args.output_format if args.output_format is not None  else FLAGS.output_format
-    output = args.output if args.output is not None else FLAGS.output
-    size = args.size if args.size is not None else FLAGS.size
+    classes = './data/labels/coco.names'
+    if config['classes']:
+        classes = config['classes']
 
-    print("hey yo")
+    output_format = 'XVID'
+    if config['output_format']:
+        output_format = config['output_format']
+
+    output = 'None'
+    if config['output']:
+        output = config['output']
+
+    size = 416
+    if config['size']:
+        size = config['size']
+
+    print(video)
     print(num_classes)
     print(tiny)
     print(weights)
-    print(video)
+    print(classes)
+    print(output_format)
+    print(output)
     print(size)
 
     # Definition of the parameters
@@ -60,14 +71,17 @@ def detect(args):
     metric = nn_matching.NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)
     tracker = Tracker(metric)
 
-    physical_devices = tf.config.experimental.list_physical_devices('GPU')
+    physical_devices = tf.config['experimental'].list_physical_devices('GPU')
     if len(physical_devices) > 0:
-        tf.config.experimental.set_memory_growth(physical_devices[0], True)
+        tf.config['experimental'].set_memory_growth(physical_devices[0], True)
 
     if tiny:
         yolo = YoloV3Tiny(classes=num_classes)
     else:
+        print("oh hello")
         yolo = YoloV3(classes=num_classes)
+
+    print("oh hello")
 
     yolo.load_weights(weights)
     logging.info('weights loaded')
@@ -152,7 +166,7 @@ def detect(args):
         #    bbox = det.to_tlbr() 
         #    cv2.rectangle(img,(int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])),(255,0,0), 2)
         
-        # print fps on screen 
+        # log.n fps on screen 
         fps  = ( fps + (1./(time.time()-t1)) ) / 2
         cv2.putText(img, "FPS: {:.2f}".format(fps), (0, 30),
                           cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 2)
