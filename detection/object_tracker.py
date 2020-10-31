@@ -5,17 +5,17 @@ from absl.flags import FLAGS
 import cv2
 import matplotlib.pyplot as plt
 import tensorflow as tf
-from yolov3_tf2.models import (
+from detection.yolov3_tf2.models import (
     YoloV3, YoloV3Tiny
 )
-from yolov3_tf2.dataset import transform_images
-from yolov3_tf2.utils import draw_outputs, convert_boxes
+from detection.yolov3_tf2.dataset import transform_images
+from detection.yolov3_tf2.utils import draw_outputs, convert_boxes
 
-from deep_sort import preprocessing
-from deep_sort import nn_matching
-from deep_sort.detection import Detection
-from deep_sort.tracker import Tracker
-from tools import generate_detections as gdet
+from detection.deep_sort import preprocessing
+from detection.deep_sort import nn_matching
+from detection.deep_sort.detection import Detection
+from detection.deep_sort.tracker import Tracker
+from detection.tools import generate_detections as gdet
 from PIL import Image
 
 flags.DEFINE_string('classes', './data/labels/coco.names', 'path to classes file')
@@ -30,7 +30,25 @@ flags.DEFINE_string('output_format', 'XVID', 'codec used in VideoWriter when sav
 flags.DEFINE_integer('num_classes', 80, 'number of classes in the model')
 
 
-def main(_argv):
+def detect(args):
+    print("hey yo")
+
+    num_classes = args.num_classes if args.num_classes is not None else FLAGS.num_classes
+    tiny = args.tiny if args.tiny is not None else FLAGS.tiny
+    weights = args.weights if args.weights is not None else FLAGS.weights
+    video = args.video if args.video is not None else FLAGS.video
+    classes = args.classes if args.classes is not None else FLAGS.classes
+    output_format = args.output_format if args.output_format is not None  else FLAGS.output_format
+    output = args.output if args.output is not None else FLAGS.output
+    size = args.size if args.size is not None else FLAGS.size
+
+    print("hey yo")
+    print(num_classes)
+    print(tiny)
+    print(weights)
+    print(video)
+    print(size)
+
     # Definition of the parameters
     max_cosine_distance = 0.5
     nn_budget = None
@@ -46,31 +64,31 @@ def main(_argv):
     if len(physical_devices) > 0:
         tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
-    if FLAGS.tiny:
-        yolo = YoloV3Tiny(classes=FLAGS.num_classes)
+    if tiny:
+        yolo = YoloV3Tiny(classes=num_classes)
     else:
-        yolo = YoloV3(classes=FLAGS.num_classes)
+        yolo = YoloV3(classes=num_classes)
 
-    yolo.load_weights(FLAGS.weights)
+    yolo.load_weights(weights)
     logging.info('weights loaded')
 
-    class_names = [c.strip() for c in open(FLAGS.classes).readlines()]
+    class_names = [c.strip() for c in open(classes).readlines()]
     logging.info('classes loaded')
 
     try:
-        vid = cv2.VideoCapture(int(FLAGS.video))
+        vid = cv2.VideoCapture(int(video))
     except:
-        vid = cv2.VideoCapture(FLAGS.video)
+        vid = cv2.VideoCapture(video)
 
     out = None
 
-    if FLAGS.output:
+    if output:
         # by default VideoCapture returns float instead of int
         width = int(vid.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fps = int(vid.get(cv2.CAP_PROP_FPS))
-        codec = cv2.VideoWriter_fourcc(*FLAGS.output_format)
-        out = cv2.VideoWriter(FLAGS.output, codec, fps, (width, height))
+        codec = cv2.VideoWriter_fourcc(*output_format)
+        out = cv2.VideoWriter(output, codec, fps, (width, height))
         list_file = open('detection.txt', 'w')
         frame_index = -1 
     
@@ -90,7 +108,7 @@ def main(_argv):
 
         img_in = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) 
         img_in = tf.expand_dims(img_in, 0)
-        img_in = transform_images(img_in, FLAGS.size)
+        img_in = transform_images(img_in, size)
 
         t1 = time.time()
         boxes, scores, classes, nums = yolo.predict(img_in)
@@ -139,7 +157,7 @@ def main(_argv):
         cv2.putText(img, "FPS: {:.2f}".format(fps), (0, 30),
                           cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 2)
         cv2.imshow('output', img)
-        if FLAGS.output:
+        if output:
             out.write(img)
             frame_index = frame_index + 1
             list_file.write(str(frame_index)+' ')
@@ -152,14 +170,15 @@ def main(_argv):
         if cv2.waitKey(1) == ord('q'):
             break
     vid.release()
-    if FLAGS.ouput:
+    if output:
         out.release()
         list_file.close()
     cv2.destroyAllWindows()
 
 
+
 if __name__ == '__main__':
     try:
-        app.run(main)
+        app.run(detect)
     except SystemExit:
         pass
