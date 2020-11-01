@@ -51,14 +51,6 @@ def detect(config):
     if config['size']:
         size = config['size']
 
-    print(video)
-    print(num_classes)
-    print(tiny)
-    print(weights)
-    print(classes)
-    print(output_format)
-    print(output)
-    print(size)
 
     # Definition of the parameters
     max_cosine_distance = 0.5
@@ -66,19 +58,28 @@ def detect(config):
     nms_max_overlap = 1.0
     
     #initialize deep sort
-    model_filename = 'model_data/mars-small128.pb'
+    model_filename = './detection/model_data/mars-small128.pb'
+    
     encoder = gdet.create_box_encoder(model_filename, batch_size=1)
     metric = nn_matching.NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)
     tracker = Tracker(metric)
+    
 
-    physical_devices = tf.config['experimental'].list_physical_devices('GPU')
+    physical_devices = tf.config.list_physical_devices('GPU')
+    print(physical_devices)
     if len(physical_devices) > 0:
+        print('hello')
         tf.config['experimental'].set_memory_growth(physical_devices[0], True)
+        print('hello2')
 
+
+
+    print("до йолы")
     if tiny:
+        print("тини")
         yolo = YoloV3Tiny(classes=num_classes)
     else:
-        print("oh hello")
+        print("нормальаня")
         yolo = YoloV3(classes=num_classes)
 
     print("oh hello")
@@ -96,6 +97,7 @@ def detect(config):
 
     out = None
 
+    print("oh hello1")
     if output:
         # by default VideoCapture returns float instead of int
         width = int(vid.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -110,6 +112,7 @@ def detect(config):
     count = 0 
     while True:
         _, img = vid.read()
+        print("oh helloop")
 
         if img is None:
             logging.warning("Empty Frame")
@@ -183,16 +186,10 @@ def detect(config):
         # press q to quit
         if cv2.waitKey(1) == ord('q'):
             break
+    
+    print("oh hello 3")
     vid.release()
     if output:
         out.release()
         list_file.close()
     cv2.destroyAllWindows()
-
-
-
-if __name__ == '__main__':
-    try:
-        app.run(detect)
-    except SystemExit:
-        pass

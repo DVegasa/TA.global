@@ -15,7 +15,7 @@ cfg0 = streamr.M3u8Watcher.Config()
 cfg0.name = "id0"
 cfg0.m3u8_url = "https://flussonic.powernet.com.ru:8081/user32003/tracks-v1/mono.m3u8"
 cfg0.ts_base_url = "https://flussonic.powernet.com.ru:8081/user32003/tracks-v1/"
-cfg0.uTS_duration = 30
+cfg0.uTS_duration = 10
 cfg0.m3u8_update_delay = 10
 cfg0.formulator = formulators.PowernetFormulator(cfg0)
 powernet.append(streamr.M3u8Watcher(cfg0))

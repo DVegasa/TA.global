@@ -22,11 +22,6 @@ from tensorflow.keras.losses import (
 from .batch_norm import BatchNormalization
 from .utils import broadcast_iou
 
-# customize your model through the following parameters
-flags.DEFINE_integer('yolo_max_boxes', 100, 'maximum number of detections at one time')
-flags.DEFINE_float('yolo_iou_threshold', 0.5, 'iou threshold')
-flags.DEFINE_float('yolo_score_threshold', 0.5, 'score threshold')
-
 yolo_anchors = np.array([(10, 13), (16, 30), (33, 23), (30, 61), (62, 45),
                          (59, 119), (116, 90), (156, 198), (373, 326)],
                         np.float32) / 416
@@ -192,10 +187,10 @@ def yolo_nms(outputs, anchors, masks, classes):
         boxes=tf.reshape(bbox, (tf.shape(bbox)[0], -1, 1, 4)),
         scores=tf.reshape(
             scores, (tf.shape(scores)[0], -1, tf.shape(scores)[-1])),
-        max_output_size_per_class=FLAGS.yolo_max_boxes,
-        max_total_size=FLAGS.yolo_max_boxes,
-        iou_threshold=FLAGS.yolo_iou_threshold,
-        score_threshold=FLAGS.yolo_score_threshold
+        max_output_size_per_class=100,
+        max_total_size=100,
+        iou_threshold=0.5,
+        score_threshold=0.5
     )
 
     return boxes, scores, classes, valid_detections
@@ -203,6 +198,7 @@ def yolo_nms(outputs, anchors, masks, classes):
 
 def YoloV3(size=None, channels=3, anchors=yolo_anchors,
            masks=yolo_anchor_masks, classes=80, training=False):
+    print("hello blian")
     physical_devices = tf.config.experimental.list_physical_devices('GPU')
     if len(physical_devices) > 0:
         tf.config.experimental.set_memory_growth(physical_devices[0], True)

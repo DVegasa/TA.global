@@ -101,6 +101,7 @@ class ImageEncoder(object):
 def create_box_encoder(model_filename, input_name="images",
                        output_name="features", batch_size=32):
     image_encoder = ImageEncoder(model_filename, input_name, output_name)
+    
     image_shape = image_encoder.image_shape
 
     def encoder(image, boxes):
@@ -114,7 +115,6 @@ def create_box_encoder(model_filename, input_name="images",
             image_patches.append(patch)
         image_patches = np.asarray(image_patches)
         return image_encoder(image_patches, batch_size)
-
     return encoder
 
 
@@ -137,6 +137,7 @@ def generate_detections(encoder, mot_dir, output_dir, detection_dir=None):
         standard MOTChallenge detections.
 
     """
+    
     if detection_dir is None:
         detection_dir = mot_dir
     try:

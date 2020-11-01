@@ -220,14 +220,13 @@ class M3u8Watcher:
               + "{:.3f}".format(self.__ts_buffer_duration__)
               + " сек)")
         detect({
-            "video": '../data_storage/uTS/id0/' + self.__cur_ts_file_name__,
-            "output": '../data_storage_output/uTS/id0/' + self.__cur_ts_file_name__,
+            "video": './detection/data/video/test.ts',
+            "output": './detection/data/video/test123.avi',
             "num_classes": 80,
             "tiny": False,
             "weights": './weights/yolov3.tf',
             "classes": './data/labels/coco.names',
             "output_format": 'XVID',
-            "output": 'None',
             "size": 416,
         })
 
